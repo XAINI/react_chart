@@ -30,6 +30,13 @@
       .domain([0, d3.max(data_temperature)])
       .range([height - padding.top - padding.bottom, 0])
 
+    tips = d3.tip()
+      .attr('class', 'd3-tip')
+      .offset([70, 70])
+      .html (d, i) ->
+        "<span>时间：#{d.bottom_value}</span><br/><span>温度：#{d.height_value}°</span>"
+    svg.call(tips)
+
     line = d3.svg.line()
       .x (d)->
         x(d.bottom_value)
@@ -40,7 +47,28 @@
     path = svg.append('path')
       .attr('class', 'line')
       .attr('d', line(data_item))
-      .attr('fill', 'blue')
+      .attr('transform', "translate(#{padding.left}, #{padding.top})")
+      .attr('fill', 'none')
+      .attr("stroke", "steelblue")
+      .attr("stroke-width", 1)
+
+    g = svg.selectAll('circle')
+      .data(data_item)
+      .enter()
+      .append('g')
+      .append('circle')
+      .attr('class', 'linecircle')
+      .attr('cx', line.x())
+      .attr('cy', line.y())
+      .attr('r', 3.5)
+      .attr('transform', "translate(#{padding.left}, #{padding.top})")
+      .on 'mouseover', (d) ->
+        d3.select(this).transition().duration(500).attr('r', 10)
+        tips.show(d)
+        jQuery(".d3-tip").css("pointer-events", "none")
+      .on 'mouseout', (d) ->
+        d3.select(this).transition().duration(500).attr('r', 3.5)
+        tips.hide(d)
 
 
     x_axis = d3.svg.axis()
